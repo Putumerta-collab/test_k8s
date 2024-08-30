@@ -4,7 +4,17 @@ pipeline {
     environment {
         KUBE_CONFIG = credentials('kube-config') // Sesuaikan dengan nama credential kubeconfig kamu
     }
-
+    stages {
+            stage('Install kubectl') {
+                steps {
+                    sh '''
+                        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+                        chmod +x kubectl
+                        mv kubectl /usr/local/bin/
+                    '''
+                }
+            }
+        
     stages {
         stage('Checkout') {
             steps {
