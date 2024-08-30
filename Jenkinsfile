@@ -1,36 +1,49 @@
 pipeline {
-    agent any
+    agent {
+        kubernetes {
+            label 'jenkins-agent'
+            yaml """
+            apiVersion: v1
+            kind: Pod
+            spec:
+              containers:
+              - name: kubectl
+                image: bitnami/kubectl:latest
+                command:
+                - cat
+                tty: true
+            """
+        }
+    }
 
     environment {
-        KUBE_CONFIG = credentials('kube-config') // Sesuaikan dengan nama credential kubeconfig kamu
+        KUBE_CONFIG = credentials('kube-config')
     }
-    stages {
-            stage('Install kubectl') {
-                steps {
-                    sh '''
-                        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-                        chmod +x kubectl
-                        mv kubectl /usr/local/bin/
-                    '''
-                }
-            }
-        
+
     stages {
         stage('Checkout') {
             steps {
-                // Melakukan checkout dari repository GitHub
                 git url: 'https://github.com/Putumerta-collab/test_k8s.git', branch: 'main'
+            }
+        }
+
+        stage('Install kubectl') {
+            steps {
+                sh '''
+                    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+                    chmod +x kubectl
+                    mv kubectl /usr/local/bin/
+                '''
             }
         }
 
         stage('Deploy NGINX') {
             steps {
                 script {
-                    // Mengaplikasikan deployment NGINX
-                    sh 'kubectl apply -f k8s/nginx-deployment.yaml'
-                    
-                    // Mengaplikasikan service NGINX
-                    sh 'kubectl apply -f k8s/nginx-service.yaml'
+                    withCredentials([file(credentialsId: 'kube-config-id', variable: 'KUBECONFIG')]) {
+                        sh 'kubectl apply -f k8s/nginx-deployment.yaml'
+                        sh 'kubectl apply -f k8s/nginx-service.yaml'
+                    }
                 }
             }
         }
