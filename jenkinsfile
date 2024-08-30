@@ -9,7 +9,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Melakukan checkout dari repository GitHub
-                git url: 'https://github.com/username/repository-name.git', branch: 'main'
+                git url: 'https://github.com/Putumerta-collab/test_k8s.git', branch: 'main'
             }
         }
 
