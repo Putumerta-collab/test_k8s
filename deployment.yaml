@@ -5,7 +5,7 @@ metadata:
   labels:
     app: nginx
 spec:
-  replicas: 1  # Anda bisa mengatur jumlah replicas sesuai kebutuhan
+  replicas: 2  # Anda bisa mengatur jumlah replicas sesuai kebutuhan
   selector:
     matchLabels:
       app: nginx
